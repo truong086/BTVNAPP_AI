@@ -16,7 +16,11 @@ interface Plate {
   number: string;
   image?: string;
   createdAt: number;
+  status?: "checked-in" | "checked-out" | "none";
+  checkInTime?: number;
+  checkOutTime?: number;
 }
+
 
 export default function App() {
   const samplePlates: Plate[] = [
@@ -166,6 +170,25 @@ export default function App() {
     saveData(plates.filter((x) => x.id !== id));
   };
 
+  const handleCheckIn = (item: Plate) => {
+  const updated = plates.map((p) =>
+    p.id === item.id
+      ? { ...p, status: "checked-in", checkInTime: Date.now() }
+      : p
+  );
+  saveData(updated);
+};
+
+const handleCheckOut = (item: Plate) => {
+  const updated = plates.map((p) =>
+    p.id === item.id
+      ? { ...p, status: "checked-out", checkOutTime: Date.now() }
+      : p
+  );
+  saveData(updated);
+};
+
+
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>🚗 License Plate Demo</Text>
@@ -211,6 +234,7 @@ export default function App() {
         >
           {editingId ? "Cập nhật" : "Thêm"}
         </Button>
+        
       </View>
 
       <FlatList
@@ -243,6 +267,42 @@ export default function App() {
                 />
               </View>
             </View>
+            <View style={styles.cardButtons}>
+  <IconButton
+    icon="login"
+    size={24}
+    onPress={() => handleCheckIn(item)}
+  />
+  <IconButton
+    icon="logout"
+    size={24}
+    onPress={() => handleCheckOut(item)}
+  />
+  {/* <IconButton
+    icon="pencil"
+    size={24}
+    onPress={() => editPlate(item)}
+  />
+  <IconButton
+    icon="delete"
+    size={24}
+    onPress={() => deletePlate(item.id)}
+  /> */}
+</View>
+
+            <View style={{ marginTop: 6 }}>
+  {item.status === "checked-in" && (
+    <Text style={styles.statusText}>
+      ✅ Check-in: {new Date(item.checkInTime!).toLocaleTimeString()}
+    </Text>
+  )}
+  {item.status === "checked-out" && (
+    <Text style={styles.statusText}>
+      ⏹ Check-out: {new Date(item.checkOutTime!).toLocaleTimeString()}
+    </Text>
+  )}
+</View>
+
           </Card>
         )}
       />
@@ -251,6 +311,16 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+  statusText: {
+  fontSize: 14,
+  color: "#6200ee",
+  fontWeight: "600",
+},
+cardButtons: {
+  flexDirection: "row",
+  alignItems: "center",
+},
+
   container: {
     flex: 1,
     padding: 16,
